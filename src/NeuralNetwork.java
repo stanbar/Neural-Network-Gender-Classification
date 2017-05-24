@@ -150,34 +150,26 @@ public class NeuralNetwork {
 
     private void readInputs(File file) {
         inputLayer.clear();
-        int counter = 0;
         try (Scanner scanner = new Scanner(file)) {
             while (scanner.hasNext()) {
-                counter++;
                 String[] line = scanner.nextLine().split(" ");
-                for (String value : line) {
+                for (String value : line)
                     inputLayer.add((double) Integer.parseInt(value));
-                }
+
             }
-            System.out.printf("Read %d x %d\n",counter ,counter);
 
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
     }
 
-    private double  classify() {
-        double output = getOutput() -0.5;
-        double maxDeviation = 0.5;
+    private double classify() {
+        double output = getOutput() - 0.5;
+        double maxDeviation = 0.4;
         double certainty;
-        if (output > 0) { //More likely to be male
-            certainty = 100 * (output / maxDeviation);
-            return certainty;
-        } else if (output < 0) { //More likely to be female
-            certainty = 100 * (output / maxDeviation);
-            return certainty;
-        } else { // 50/50
-            return 0;
-        }
+
+        certainty = 100 * (output / maxDeviation);
+        return certainty;
+
     }
 }

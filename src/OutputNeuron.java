@@ -7,10 +7,6 @@ public class OutputNeuron extends Neuron {
     }
     
     public void computeGradient(final double targetOutput) {
-        double prediction = output;
-        double actual = targetOutput;
-        double error =(targetOutput - output);
-        double weightChange = //backward pass
         gradient = output * (1 - output) * (targetOutput - output);
     }
 }

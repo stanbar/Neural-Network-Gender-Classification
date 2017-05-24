@@ -79,6 +79,7 @@ public class ImageProcessor {
             pixels = new int[width][height];
             for (int w = 0; w < width; w++) {
                 for (int h = 0; h < height; h++) {
+                    //pixels[w][h] = img.getRGB(w,h);
                     pixels[w][h] = raster.getSample(w, h, 0);
                 }
 
@@ -137,6 +138,10 @@ public class ImageProcessor {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static void main(String[] args) throws IOException {
+        ImageProcessor.getImage(readPixelsArray(new File("/Users/admin1/Google Drive/ProjectsJava/NeuralNetworkGenderClassificator/res/Set2/Test/0_1_FEMALE_685_656.txt")));
     }
 
 }

@@ -7,9 +7,9 @@ import java.util.Random;
 
 public class Main {
     private NeuralNetwork neuralNetwork = new NeuralNetwork();
-    private File maleFolder = new File("res/Zestaw1/Male");
-    private File femaleFolder = new File("res/Zestaw1/Female");
-    private File testFolder = new File("res/Zestaw1/Test");
+    private File maleFolder = new File("res/Set2/Male");
+    private File femaleFolder = new File("res/Set2/Female");
+    private File testFolder = new File("res/Set2/Test");
 
     private final ArrayList<File> files = new ArrayList<>();
     private final ArrayList<Boolean> genders = new ArrayList<>();
@@ -19,7 +19,7 @@ public class Main {
     public static void main(String... args) {
         Main main = new Main();
         if (args.length >= 2)
-            switchRoot(main, args);
+            main.switchRoot(args);
         if (args[0].equalsIgnoreCase("-train")) {
             main.train();
         } else if (args[0].equalsIgnoreCase("-validate")) {
@@ -29,20 +29,24 @@ public class Main {
         } else if (args[0].equalsIgnoreCase("-visualize")) {
             main.visualize();
         } else if (args[0].equalsIgnoreCase("-convert")) {
-            ImageProcessor.convertImagesToArrays(main.root);
+            main.convert();
+
         } else
             System.err.println("Invalid argument.");
     }
 
-    private static void switchRoot(Main main, String... args) {
-        main.root = new File(args[1]);
-        main.maleFolder = new File(main.root, "Male");
-        main.femaleFolder = new File(main.root, "Female");
-        main.testFolder = new File(main.root, "Test");
+
+
+
+    public void switchRoot(String... args) {
+        root = new File(args[1]);
+        maleFolder = new File(root, "Male");
+        femaleFolder = new File(root, "Female");
+        testFolder = new File(root, "Test");
     }
 
 
-    private void train() {
+    public void train() {
         for (File file : femaleFolder.listFiles()) {
             if (!file.isFile() || file.isHidden())
                 continue;
@@ -70,7 +74,7 @@ public class Main {
         }
     }
 
-    private void validate() {
+    public void validate() {
         for (File file : femaleFolder.listFiles()) {
             if(!file.isFile() || file.isHidden())
                 continue;
@@ -88,7 +92,7 @@ public class Main {
         neuralNetwork.validate(files, genders);
     }
 
-    private void test() {
+    public void test() {
         for (File file : testFolder.listFiles()) {
             if(!file.isFile() || file.isHidden())
                 continue;
@@ -112,6 +116,9 @@ public class Main {
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
+    }
+    public void convert() {
+        ImageProcessor.convertImagesToArrays(root);
     }
 
 }
