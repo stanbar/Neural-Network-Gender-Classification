@@ -139,10 +139,4 @@ public class ImageProcessor {
         }
     }
 
-    //Test
-    public static void main(String[] args) throws IOException {
-        ImageProcessor imageProcessor = new ImageProcessor();
-        imageProcessor.getImage(imageProcessor.readPixelsArray(new File("/Users/admin1/Google Drive/ProjectsJava/NeuralNetworkGenderClassificator/res/Zestaw3/Test/3_1_male_-17.txt")));
-
-    }
 }
