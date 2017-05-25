@@ -6,9 +6,9 @@ import java.util.List;
 
 public class Main {
     private NeuralNetwork neuralNetwork = new NeuralNetwork();
-    private File maleFolder = new File("res/Set2/Male");
-    private File femaleFolder = new File("res/Set2/Female");
-    private File testFolder = new File("res/Set2/Test");
+    private File maleFolder = new File("res/data/Male");
+    private File femaleFolder = new File("res/data/Female");
+    private File testFolder = new File("res/data/Test");
 
     private ArrayList<File> files = new ArrayList<>();
     private ArrayList<Boolean> genders = new ArrayList<>();
