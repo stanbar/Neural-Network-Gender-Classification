@@ -1,6 +1,7 @@
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.io.*;
 import java.nio.file.Files;
@@ -27,7 +28,7 @@ public class ImageProcessor {
             for (File file : imagesLocation.listFiles()) {
                 if (!file.isFile() || file.isHidden())
                     continue;
-                int[][] array = getPixelsArray(file);
+                int[][] array = convertTo2DWithoutUsingGetRGB(ImageIO.read(file));
                 String name = file.getName().toLowerCase();
                 File outputDir;
                 String postfix = ".txt";
@@ -80,7 +81,7 @@ public class ImageProcessor {
             for (int w = 0; w < width; w++) {
                 for (int h = 0; h < height; h++) {
                     //pixels[w][h] = img.getRGB(w,h);
-                    pixels[w][h] = raster.getSample(w, h, 0);
+                    pixels[w][h] = raster.getSample(h, w, 0);
                 }
 
             }
@@ -138,6 +139,49 @@ public class ImageProcessor {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static int[][] convertTo2DWithoutUsingGetRGB(BufferedImage image) {
+
+        final byte[] pixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+        final int width = image.getWidth();
+        final int height = image.getHeight();
+        final boolean hasAlphaChannel = image.getAlphaRaster() != null;
+
+        int[][] result = new int[height][width];
+        if (hasAlphaChannel) {
+            final int pixelLength = 4;
+            for (int pixel = 0, row = 0, col = 0; pixel < pixels.length; pixel += pixelLength) {
+                int argb = 0;
+                argb += (((int) pixels[pixel] & 0xff) << 24); // alpha
+                argb += ((int) pixels[pixel + 1] & 0xff); // blue
+                argb += (((int) pixels[pixel + 2] & 0xff) << 8); // green
+                argb += (((int) pixels[pixel + 3] & 0xff) << 16); // red
+                result[row][col] = argb;
+                col++;
+                if (col == width) {
+                    col = 0;
+                    row++;
+                }
+            }
+        } else {
+            final int pixelLength = 3;
+            for (int pixel = 0, row = 0, col = 0; pixel < pixels.length; pixel += pixelLength) {
+                int argb = 0;
+                argb += -16777216; // 255 alpha
+                argb += ((int) pixels[pixel] & 0xff); // blue
+                argb += (((int) pixels[pixel + 1] & 0xff) << 8); // green
+                argb += (((int) pixels[pixel + 2] & 0xff) << 16); // red
+                result[row][col] = argb;
+                col++;
+                if (col == width) {
+                    col = 0;
+                    row++;
+                }
+            }
+        }
+
+        return result;
     }
 
     public static void main(String[] args) throws IOException {

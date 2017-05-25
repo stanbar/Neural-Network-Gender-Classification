@@ -2,8 +2,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Random;
+import java.util.List;
 
 public class Main {
     private NeuralNetwork neuralNetwork = new NeuralNetwork();
@@ -11,10 +10,11 @@ public class Main {
     private File femaleFolder = new File("res/Set2/Female");
     private File testFolder = new File("res/Set2/Test");
 
-    private final ArrayList<File> files = new ArrayList<>();
-    private final ArrayList<Boolean> genders = new ArrayList<>();
+    private ArrayList<File> files = new ArrayList<>();
+    private ArrayList<Boolean> genders = new ArrayList<>();
 
     private File root;
+    private List<Data> data;
 
     public static void main(String... args) {
         Main main = new Main();
@@ -36,8 +36,6 @@ public class Main {
     }
 
 
-
-
     public void switchRoot(String... args) {
         root = new File(args[1]);
         maleFolder = new File(root, "Male");
@@ -47,25 +45,24 @@ public class Main {
 
 
     public void train() {
-        for (File file : femaleFolder.listFiles()) {
-            if (!file.isFile() || file.isHidden())
-                continue;
-            files.add(file);
-            genders.add(Boolean.FALSE);
+        data = new ArrayList<>();
+        File[] males = maleFolder.listFiles();
+        File[] females = femaleFolder.listFiles();
+        int size = males.length > females.length ? males.length : females.length;
+        for (int i = 0; i < size; i++) {
+
+            if (i < males.length && !males[i].isHidden() && males[i].isFile())
+                data.add(new Data(males[i], true));
+            if (i < females.length && !females[i].isHidden() && females[i].isFile())
+                data.add(new Data(females[i], false));
         }
-
-        for (File file : maleFolder.listFiles()) {
-            if (!file.isFile() || file.isHidden())
-                continue;
-            files.add(file);
-            genders.add(Boolean.TRUE);
+        double accuracy;
+        for (int i = 0; i < 50; i++) {
+            accuracy = neuralNetwork.trainNetwork(data);
+            System.out.println("Accuracy: " + accuracy);
+            if(accuracy >= NeuralNetwork.LEARNING_ACCURACY)
+                break;
         }
-
-        long seed = 3;
-        Collections.shuffle(files, new Random(seed));
-        Collections.shuffle(genders, new Random(seed));
-
-        neuralNetwork.trainNetwork(files, genders);
 
         try (FileOutputStream fout = new FileOutputStream("weights")) {
             neuralNetwork.saveWeights(fout);
@@ -74,27 +71,10 @@ public class Main {
         }
     }
 
-    public void validate() {
-        for (File file : femaleFolder.listFiles()) {
-            if(!file.isFile() || file.isHidden())
-                continue;
-            files.add(file);
-            genders.add(Boolean.FALSE);
-        }
-
-        for (File file : maleFolder.listFiles()) {
-            if(!file.isFile() || file.isHidden())
-                continue;
-            files.add(file);
-            genders.add(Boolean.TRUE);
-        }
-
-        neuralNetwork.validate(files, genders);
-    }
-
     public void test() {
+        files = new ArrayList<>();
         for (File file : testFolder.listFiles()) {
-            if(!file.isFile() || file.isHidden())
+            if (!file.isFile() || file.isHidden())
                 continue;
             files.add(file);
         }
@@ -108,7 +88,28 @@ public class Main {
         neuralNetwork.testNetwork(files);
     }
 
-    private void visualize() {
+    public void validate() {
+        files = new ArrayList<>();
+        genders = new ArrayList<>();
+        for (File file : femaleFolder.listFiles()) {
+            if (!file.isFile() || file.isHidden())
+                continue;
+            files.add(file);
+            genders.add(Boolean.FALSE);
+        }
+
+        for (File file : maleFolder.listFiles()) {
+            if (!file.isFile() || file.isHidden())
+                continue;
+            files.add(file);
+            genders.add(Boolean.TRUE);
+        }
+
+        neuralNetwork.validate(files, genders);
+    }
+
+
+    public void visualize() {
         //reuse fin to get weights
         try (FileInputStream fin = new FileInputStream("weights")) {
             Painter.painter(fin);
@@ -117,8 +118,8 @@ public class Main {
             System.err.println(e.getMessage());
         }
     }
+
     public void convert() {
         ImageProcessor.convertImagesToArrays(root);
     }
-
 }

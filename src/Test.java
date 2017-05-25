@@ -7,8 +7,9 @@ public class Test {
         main.switchRoot("","/Users/admin1/Google Drive/ProjectsJava/NeuralNetworkGenderClassificator/res/Set2/");
 
         //main.convert();
-        //main.train();
-        main.test();
+        main.train();
         //main.validate();
+        main.test();
+        //main.visualize();
     }
 }

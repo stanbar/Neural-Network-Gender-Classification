@@ -1,12 +1,10 @@
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 
 public class NeuralNetwork {
+    public static final double LEARNING_ACCURACY = 0.9;
     private static final double CLASSIFICATION_TARGET_MALE = 0.9;
     private static final double CLASSIFICATION_TARGET_FEMALE = 0.1;
     private static final int NUM_INPUT_NODES = 8100;
@@ -25,36 +23,42 @@ public class NeuralNetwork {
         }
     }
 
-    public double trainNetwork(ArrayList<File> files, ArrayList<Boolean> genders) {
+    public double trainNetwork(List<Data> data) {
         int matches = 0;
-        for (int i = 0; i < files.size(); i++) {
-            readInputs(files.get(i));
+        for (int i = 0; i < data.size(); i++) {
+            readInputs(data.get(i).file);
             computeOutput();
             double certainty = classify();
             //System.out.println(genders.get(i) + " " + certainty);
-            if (genders.get(i) == (certainty > 0))
+            if (data.get(i).gender == (certainty > 0))
                 matches++;
-            if (genders.get(i))
+            if (data.get(i).gender)
                 updateWeights(CLASSIFICATION_TARGET_MALE);
             else
                 updateWeights(CLASSIFICATION_TARGET_FEMALE);
         }
 
-        double accuracy = ((double) matches) / ((double) files.size());
+        double accuracy = ((double) matches) / ((double) data.size());
         return accuracy;
     }
 
     public void testNetwork(ArrayList<File> files) {
+        int match=0;
         for (File file : files) {
             readInputs(file);
             computeOutput();
             double certainty = classify();
             if (certainty > 0) {
+                if(file.getName().toLowerCase().contains("male") && !file.getName().toLowerCase().contains("female"))
+                    match++;
                 System.out.println(file.getName() + ": " + "MALE " + String.format("%.2f", certainty));
             } else {
+                if(file.getName().toLowerCase().contains("female"))
+                    match++;
                 System.out.println(file.getName() + ": " + "FEMALE " + String.format("%.2f", -certainty));
             }
         }
+        System.out.printf("Matched %d for %d files = %.2f",match,files.size(),(double)match/(double)files.size());
     }
 
     public double testNetwork(ArrayList<File> files, ArrayList<Boolean> genders) {
@@ -91,8 +95,11 @@ public class NeuralNetwork {
                 trainingFiles.subList(j * foldSize, j == 4 ? files.size() : (j + 1) * foldSize).clear();
                 trainingGenders = new ArrayList<>(genders);
                 trainingGenders.subList(j * foldSize, j == 4 ? genders.size() : (j + 1) * foldSize).clear();
-
-                double trainingAccuracy = trainNetwork(trainingFiles, trainingGenders);
+                List<Data> data = new ArrayList<>();
+                for (int k = 0; k < trainingFiles.size(); k++) {
+                    data.add(new Data(trainingFiles.get(k),trainingGenders.get(i)));
+                }
+                double trainingAccuracy = trainNetwork(data);
                 double trainingDelta = trainingAccuracy - trainingMean;
                 trainingMean += trainingDelta / (j + 1);
                 trainingM2 += trainingDelta * (trainingAccuracy - trainingMean);
@@ -165,7 +172,7 @@ public class NeuralNetwork {
 
     private double classify() {
         double output = getOutput() - 0.5;
-        double maxDeviation = 0.4;
+        double maxDeviation = 0.5;
         double certainty;
 
         certainty = 100 * (output / maxDeviation);

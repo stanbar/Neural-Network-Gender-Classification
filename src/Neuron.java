@@ -16,11 +16,15 @@ public abstract class Neuron {
         this.numInputs = numInputs;
         this.inputs = inputs;
         double biasValue = 1;
-        bias = biasValue * 2 * (Math.random() - 0.5) * initalWeightClamp;
+        bias = biasValue * getRandomWeight(initalWeightClamp);
         inputWeights = new double[numInputs];
         for (int i = 0; i < numInputs; i++) {
-            inputWeights[i] = 2 * (Math.random() - 0.5) * initalWeightClamp;
+            inputWeights[i] = getRandomWeight(initalWeightClamp);
         }
+    }
+
+    private double getRandomWeight(double initalWeightClamp) {
+        return 2 * (Math.random() - 0.5) * initalWeightClamp;
     }
 
     public void computeOutput() {
