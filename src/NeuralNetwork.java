@@ -4,11 +4,11 @@ import java.io.FileOutputStream;
 import java.util.*;
 
 public class NeuralNetwork {
-    public static final double LEARNING_ACCURACY = 0.9;
+    public static final double LEARNING_ACCURACY = 0.95;
     private static final double CLASSIFICATION_TARGET_MALE = 0.9;
     private static final double CLASSIFICATION_TARGET_FEMALE = 0.1;
     private static final int NUM_INPUT_NODES = 8100;
-    private static final int NUM_HIDDEN_NODES = 40;
+    private static final int NUM_HIDDEN_NODES = 60;
     private static final double LEARNING_FACTOR = 0.3;
     private static final double INTIAL_WEIGHT_VALUE_CLAMP = 0.5;
 
@@ -87,14 +87,14 @@ public class NeuralNetwork {
             long seed = System.nanoTime();
             Collections.shuffle(files, new Random(seed));
             Collections.shuffle(genders, new Random(seed));
-
-            for (int j = 0; j < 5; j++) {
-                testFiles = new ArrayList<>(files.subList(j * foldSize, j == 4 ? files.size() : (j + 1) * foldSize));
-                testGenders = new ArrayList<>(genders.subList(j * foldSize, j == 4 ? genders.size() : (j + 1) * foldSize));
+            int max = 5;
+            for (int j = 0; j < max; j++) {
+                testFiles = new ArrayList<>(files.subList(j * foldSize, j == max-1 ? files.size() : (j + 1) * foldSize));
+                testGenders = new ArrayList<>(genders.subList(j * foldSize, j == max-1 ? genders.size() : (j + 1) * foldSize));
                 trainingFiles = new ArrayList<>(files);
-                trainingFiles.subList(j * foldSize, j == 4 ? files.size() : (j + 1) * foldSize).clear();
+                trainingFiles.subList(j * foldSize, j == max-1 ? files.size() : (j + 1) * foldSize).clear();
                 trainingGenders = new ArrayList<>(genders);
-                trainingGenders.subList(j * foldSize, j == 4 ? genders.size() : (j + 1) * foldSize).clear();
+                trainingGenders.subList(j * foldSize, j == max-1 ? genders.size() : (j + 1) * foldSize).clear();
                 List<Data> data = new ArrayList<>();
                 for (int k = 0; k < trainingFiles.size(); k++) {
                     data.add(new Data(trainingFiles.get(k),trainingGenders.get(i)));
@@ -110,8 +110,8 @@ public class NeuralNetwork {
                 testM2 += testDelta * (testAccuracy - testMean);
             }
 
-            double trainingSD = Math.sqrt(trainingM2 / 4);
-            double testSD = Math.sqrt(testM2 / 4);
+            double trainingSD = Math.sqrt(trainingM2 / (max-1));
+            double testSD = Math.sqrt(testM2 / (max-1));
 
             System.out.println("TEST " + (i + 1) + " RESULTS");
             System.out.println("Trainging Mean: " + trainingMean + " Training Standard Deviation: " + trainingSD);
